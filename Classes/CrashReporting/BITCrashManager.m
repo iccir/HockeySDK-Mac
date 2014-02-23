@@ -80,6 +80,7 @@ NSString *const kHockeyErrorDomain = @"HockeyErrorDomain";
     _askUserDetails = YES;
     
     _plcrExceptionHandler = nil;
+    _plcrCrashCallbacks = nil;
     _crashIdenticalCurrentVersion = YES;
     
     _timeintervalCrashInLastSessionOccured = -1;
@@ -304,6 +305,11 @@ NSString *const kHockeyErrorDomain = @"HockeyErrorDomain";
 
 
 #pragma mark - Public
+
+- (void)setCrashCallbacks: (BITPLCrashReporterCallbacks *) callbacks {
+  _plcrCrashCallbacks = callbacks;
+}
+
 
 /**
  * Check if the debugger is attached
@@ -569,6 +575,11 @@ NSString *const kHockeyErrorDomain = @"HockeyErrorDomain";
       
       // get the current top level error handler
       NSUncaughtExceptionHandler *initialHandler = NSGetUncaughtExceptionHandler();
+
+      // set any user defined callbacks, hopefully the users knows what they do
+      if (_plcrCrashCallbacks) {
+        [_plCrashReporter setCrashCallbacks:(PLCrashReporterCallbacks *)_plcrCrashCallbacks];
+      }
       
       // Enable the Crash Reporter
       BOOL crashReporterEnabled = [_plCrashReporter enableCrashReporterAndReturnError:&error];
